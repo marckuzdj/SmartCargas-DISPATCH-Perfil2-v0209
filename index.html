@@ -1802,7 +1802,6 @@
 
     // 4. ENVIO DE OCORRÊNCIA: Valida os campos obrigatórios e monta a concatenação de string exigida
     function enviarRelatorioOcorrenciaAPI() {
-      // 🌟 CORREÇÃO CIRÚRGICA: Alterado de 'origen' para 'origem' para sanar o ReferenceError
       const origem = document.getElementById('ocorrencia-origem').value;
       const descricao = document.getElementById('ocorrencia-descricao').value.trim();
       
@@ -1821,17 +1820,16 @@
       let fornecedoresAfetadosList = [];
       chksForn.forEach(chk => fornecedoresAfetadosList.push(chk.value));
 
-      // Captura o carimbo do fuso horário brasileiro para a concatenação exigida
       const d = new Date();
       const carimboString = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
 
-      // FORMATÇÃO EXIGIDA CONCATENADA: [dd/MM/yyyy hh:mm:ss] Pedidos afetados (Forn1, Forn2) | Origem: TOUTBOX | Falha no link
+      // FORMATÇÃO EXIGIDA CONCATENADA
       const intercorrênciaTextoFinal = `[${carimboString}] Pedidos afetados (${fornecedoresAfetadosList.join(', ')}) | Origem: ${origem} | ${descricao}`;
 
       const btnEnviar = document.querySelector('.btn-primary[onclick="enviarRelatorioOcorrenciaAPI()"]');
       if (btnEnviar) { btnEnviar.disabled = true; btnEnviar.textContent = 'Enviando...'; }
 
-      // 🌟 VISUAL PROGRESS: Ativa a exibição da barra em modo síncrono antes da API
+      // VISUAL PROGRESS: Ativa a exibição da barra em modo síncrono antes da API
       const containerProgresso = document.getElementById('progresso-dispatch-container');
       const barraFill = document.getElementById('barra-progresso-fill');
       const txtPct = document.getElementById('txt-porcentagem-progresso');
@@ -1846,12 +1844,11 @@
 
       fecharModalOcorrencia();
 
-      // Dispara o lote contendo o relatório estruturado de auditoria na coluna G
+      // 🌟 CORREÇÃO CIRÚRGICA: Retorna a passar loteRomaneiosEmProcesso (Lote Cheio)
       dispararRequisicaoApi({
         acao: 'confirmarDispatch',
-        listaRomaneios: loteRomaneiosEmProcesso,
+        listaRomaneios: loteRomaneiosEmProcesso, // ◄ ALVO CORRIGIDO (Lote Completo)
         usuario: usuarioLogado,
-        // CORREÇÃO CIRÚRGICA: Envia a regional ativa do filtro para validação de matriz no backend
         regionalFiltroAtivo: document.getElementById('filtro-regional').value,
         intercorrenciaText: intercorrênciaTextoFinal
       })
@@ -1859,7 +1856,6 @@
         if (btnEnviar) { btnEnviar.disabled = false; btnEnviar.textContent = 'Enviar Relatório'; }
         if (response && response.success) {
           
-          // 🌟 VISUAL PROGRESS: Completa a animação da barra antes de fechar o fluxo
           if (barraFill && txtPct && txtStatus) {
             barraFill.style.width = '100%';
             txtPct.textContent = '100%';
@@ -1870,7 +1866,7 @@
             if (containerProgresso) containerProgresso.style.display = 'none';
             alert('Relatório gravado e Dispatch efetuado com sucesso!');
             executarSucessoPosBaixaLocal();
-          }, 400); // Pequena pausa para visualização do status concludente
+          }, 400);
 
         } else {
           if (containerProgresso) containerProgresso.style.display = 'none';
